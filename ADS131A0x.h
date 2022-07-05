@@ -19,8 +19,8 @@ Description       ADS131A04EVM       RPi4B
 GND               AGND               GND
 VDD               VDD                +5V
 MOSI              MISO               MOSI
-MISO              MOSI               MISO    
-SCLK                                 
+MISO              MOSI               MISO
+SCLK
 CS                                   Pin10
 
 
@@ -30,7 +30,7 @@ V0.1.0
 
 #include <string.h>
 #include <stdint.h>
-
+#include "../Driver_RPiOS/SPISet.h"
 /*
 How to set up Sampling Rate?
 1.f_CLKIN(external clock)=16.384MHz=> this is fixed, which is generated from crystal
@@ -46,7 +46,7 @@ CMD_WREG_temp[0]=CMD_WREG_Mask[0] | RegAdr_CLK1;//set Regiser Address to Write
 CMD_WREG_temp[1]=0x02;//set Regiser Data to Write
 */
 
-/*There are no specific command for reading ADC value, 
+/*There are no specific command for reading ADC value,
 because the ADC always returns all channels'(4or2) datas at 2nd~5th(or 2nd~3rd) byte on MISO*/
 
 enum ChipSelectPin
@@ -64,4 +64,4 @@ void ADS131A0x_InitialADC();
 void ADS131A0x_Start();
 void ADS131A0x_Stop();
 void ADS131A0x_GetADCData(uint8_t Mode, float *DataBuffer);
-int32_t ConvertInt_24to32(uint8_t *byteArray); //2's complement 24bit to 32bit integer
+int32_t ConvertInt_24to32(uint8_t *byteArray); // 2's complement 24bit to 32bit integer

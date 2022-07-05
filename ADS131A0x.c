@@ -5,7 +5,6 @@
 #include "ADS131A0x.h"
 
 // include this wrapper(a linux SPI userspace driver) to create a API for user
-#include "Driver_RPiOS/SPISet.h"
 
 // Constants sould be defined with MACRO, where it doesn't declare a variable nor occupy any memory spaces,
 // it just replace the keyword with conatant by the Pre-processor
@@ -91,6 +90,10 @@ void ADS131A0x_setSPI(enum ChipSelectPin CS_Pin, uint64_t Speed)
     // set CS=0,speed=2MHz,SPI MODE=1
     spiFd = SPI_Setup(CS_Pin, Speed, 1);
 
+    printf("RPi4B SPI Init with CS_pin:%d / speed:%d", CS_Pin, Speed);
+
+    // printf(spiFd > 0 ? "success" : "failed");
+    /*
     if (spiFd > 0)
     {
         printf("SPI initialization success at FD=%d\n", spiFd);
@@ -98,7 +101,7 @@ void ADS131A0x_setSPI(enum ChipSelectPin CS_Pin, uint64_t Speed)
     else
     {
         printf("SPI initialization failed at FD=%d\n", spiFd);
-    }
+    }*/
 }
 //-------------------------------------------------------
 /*
