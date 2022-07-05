@@ -90,9 +90,10 @@ void ADS131A0x_setSPI(enum ChipSelectPin CS_Pin, uint64_t Speed)
     // set CS=0,speed=2MHz,SPI MODE=1
     spiFd = SPI_Setup(CS_Pin, Speed, 1);
 
-    printf("RPi4B SPI Init with CS_pin:%d / speed:%d", CS_Pin, Speed);
+    printf("RPi4B SPI Init with CS_pin:%d / speed:%dHZ ", CS_Pin, Speed);
+    printf(spiFd > 0 ? "success" : "failed");
+    printf("at FD=%d\n", spiFd");
 
-    // printf(spiFd > 0 ? "success" : "failed");
     /*
     if (spiFd > 0)
     {
