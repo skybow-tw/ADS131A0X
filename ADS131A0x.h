@@ -30,7 +30,7 @@ V0.1.0
 
 #include <string.h>
 #include <stdint.h>
-#include "../Driver_RPiOS/SPISet.h"
+#include "../Driver_SPI_RPiOS/SPISet.h"
 /*
 How to set up Sampling Rate?
 1.f_CLKIN(external clock)=16.384MHz=> this is fixed, which is generated from crystal
