@@ -65,3 +65,4 @@ void ADS131A0x_Start();
 void ADS131A0x_Stop();
 void ADS131A0x_GetADCData(uint8_t Mode, float *DataBuffer);
 int32_t ConvertInt_24to32(uint8_t *byteArray); // 2's complement 24bit to 32bit integer
+void DebugOutput(char *debug_message);

@@ -13,7 +13,10 @@
 #define SIZE_DATAFRAME_A04 6                              // FIXED=1, the number of device word per data frame is 6(for ADS131A04)
 #define SIZE_DATAFRAME_A02 4                              // FIXED=1, the number of device word per data frame is 6(for ADS131A02)
 #define SIZE_SYSCMD LENGTH_DEVICEWORD *SIZE_DATAFRAME_A04 // 3 Bytes * 6 = 18 Bytes
-#define VREF_EXT 2.5
+// for TI EVB, onboard external Vref=2.5V
+//  #define VREF_EXT 2.5
+// for Cherry EVM, use internal Vref=4.0V or 2.442V
+#define VREF_EXT 4.0
 #define fullscale_24bit 8388608.0
 
 //---------Register Address---------:
@@ -147,48 +150,52 @@ void ADS131A0x_SYSCMD(char SysCmdSel)
 {
 
     memset(aSysCmd, 0, SIZE_SYSCMD); // Initialize aSysCmd array
-
-    printf("Sending SysCmd:");
+    DebugOutput("Sending SysCmd:");
     switch (SysCmdSel)
     {
     /*Copy the 3-Bytes system command CMD_XXXXXX and overwrite the first 3 Bytes of the "aSysCmd" array "*/
     case 'N':
-        printf("NULL\n");
+        DebugOutput("NULL\n");
         memcpy(aSysCmd, CMD_NULL, 3);
         break;
 
     case 'R':
-        printf("RESET\n");
+        DebugOutput("RESET\n");
         memcpy(aSysCmd, CMD_RESET, 3);
         break;
 
     case 'Y':
-        printf("STANDBY...\n");
+
+        DebugOutput("STANDBY...\n");
         memcpy(aSysCmd, CMD_STANDBY, 3);
         break;
 
     case 'W':
-        printf("WAKEUP!\n");
+
+        DebugOutput("WAKEUP!\n");
         memcpy(aSysCmd, CMD_WAKEUP, 3);
         break;
 
     case 'L':
-        printf("LOCK!\n");
+
+        DebugOutput("LOCK!\n");
         memcpy(aSysCmd, CMD_LOCK, 3);
         break;
 
     case 'U':
-        printf("UNLOCK!\n");
+
+        DebugOutput("UNLOCK!\n");
         memcpy(aSysCmd, CMD_UNLOCK, 3);
         break;
 
     case 'r': // read Register STAT_S and clear the error bit
-        printf("Read STAT_S(SPI)\n");
+
+        DebugOutput("Read STAT_S(SPI)\n");
         memcpy(aSysCmd, CMD_RREG_STAT_S, 3);
         break;
 
     default:
-        printf("Unknown SYSCMD!\n");
+        DebugOutput("Unknown SYSCMD!\n");
         break;
     }
 
@@ -211,13 +218,15 @@ void ADS131A0x_SYSCMD(char SysCmdSel)
     {
         // Response is always 16 bit; ADC raw data is set to 24bits
         sprintf(arySerialMsg, "NULL_Resp=%#04X,ADC1=%0#10lX \n\n", ((aResponse[0] << 8) | aResponse[1]), ADC1_raw);
-        printf(arySerialMsg);
+
+        DebugOutput(arySerialMsg);
     }
     else
     {
 
         sprintf(arySerialMsg, "Status_Resp=%0#6lX \n\n", (((uint32_t)aResponse[0]) << 8 | aResponse[1]));
-        printf(arySerialMsg);
+
+        DebugOutput(arySerialMsg);
     }
 }
 //-------------------------------------------------------
@@ -230,22 +239,32 @@ void ADS131A0x_InitialADC()
     ADS131A0x_SYSCMD('N');
 
     // ADC Initialization
-    printf("set CLK_DIV=2\n");
+
+    DebugOutput("set CLK_DIV=2\n");
+
     ADS131A0x_WREG(RegAdr_CLK1, 0x02); // set CLK_DIV=2
-    printf("set ICLK_DIV=4 and OSR=4096=> Data Rate=500Hz\n");
+
+    DebugOutput("set ICLK_DIV=4 and OSR=4096=> Data Rate=500Hz\n");
+
     ADS131A0x_WREG(RegAdr_CLK2, 0x40); // set ICLK_DIV=4 and OSR=4096=> Data Rate=500Hz
 
     // set Internal reference voltage (The 3rd bit , "INT_REFEN =1 => 0110 1000b= 0x68)
     // ADS131A0x_WREG(RegAdr_A_SYS_CFG,0x68);
 
     // Negative charge pump enable, others remain Default( High Reso. /RFEP=2.442V/ use EXT VREF,which is from EVM onboard 2.5V)
-    printf("set Negative charge pump enable\n");
-    ADS131A0x_WREG(RegAdr_A_SYS_CFG, 0xE0);
+    // ADS131A0x_WREG(RegAdr_A_SYS_CFG, 0xE0);
+    // DebugOutput("set Negative charge pump enable\n");
+
+    ADS131A0x_WREG(RegAdr_A_SYS_CFG, 0x78); // NCP down,internal Vref=4V, with AVDD=5V
+    DebugOutput("set Internal Vref=4v, NCP down!\n");
+
+    // ADS131A0x_WREG(RegAdr_A_SYS_CFG, 0xE8); // NCP up,internal Vref=2.442V,with AVDD=3.3V
 }
 //-------------------------------------------------------
 void ADS131A0x_Start()
 {
-    printf("Enable ADC channels\n");
+
+    DebugOutput("Enable ADC channels\n");
     ADS131A0x_WREG(RegAdr_ADC_ENA, 0x0F); // enable ADC channels (0000 1111b=0x0f)
     ADS131A0x_SYSCMD('W');                // WAKEUP
 }
@@ -346,4 +365,11 @@ int32_t ConvertInt_24to32(uint8_t *byteArray)
     {
         return (((uint32_t)byteArray[0]) << 16 | ((uint32_t)byteArray[1]) << 8 | byteArray[2]);
     }
+}
+
+void DebugOutput(char *debug_message)
+{
+#ifdef DEBUG_ADS131A0x
+    printf(debug_message);
+#endif
 }
